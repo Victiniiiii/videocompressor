@@ -1,5 +1,12 @@
-# "pip install moviepy" in the terminal before running it
-from moviepy.editor import VideoFileClip 
+import os
+from moviepy.editor import VideoFileClip
+
+def get_latest_video_file(directory):
+    video_files = [f for f in os.listdir(directory) if f.endswith(('.mp4', '.mov', '.avi', '.mkv', '.flv'))]
+    if not video_files:
+        raise FileNotFoundError("No video files found in the directory")
+    latest_file = max(video_files, key=lambda f: os.path.getmtime(os.path.join(directory, f)))
+    return os.path.join(directory, latest_file)
 
 def compress_video(input_path, output_path, target_size_mb, start_time, end_time):
     clip = VideoFileClip(input_path).subclip(start_time, end_time)
@@ -20,7 +27,8 @@ def parse_time(time_str):
         raise ValueError("Time must be in HH:MM:SS or MM:SS format")
 
 if __name__ == "__main__":
-    input_path = 'input.mp4'
+    directory = '.'  # Current directory
+    input_path = get_latest_video_file(directory)
     output_path = 'output.mp4'
     target_size_mb = float(input("Enter the target size in MB: "))
     start_time = parse_time(input("Enter the start timestamp (HH:MM:SS or MM:SS): "))
